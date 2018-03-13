@@ -1,0 +1,205 @@
+<html>
+  <head>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel='stylesheet' type='text/css' href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css'>
+    <link rel='stylesheet' type='text/css' href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css.map'>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.1/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.1/mode-c_cpp.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.1/snippets/c_cpp.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.1/theme-tomorrow_night.js"></script>
+  </head>
+
+  <body>
+
+
+<section class='hero is-info'>
+<div class='hero-body'>
+<h1 class='title'>
+  EECS475 Winter 2018 Project Testing Tool
+</h1>
+  <h2 class='subtitle'>
+  Version: {{version}}  (Compile Only)
+  </h2>
+</div>
+</section>
+
+<textarea id='ha' rows=20>
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <utility>
+#include <cassert>
+#include "ec_ops.h"
+using namespace std;
+
+Zp Zp::inverse() const{
+	// Implement the Extended Euclidean Algorithm to return the inverse mod PRIME		
+
+	assert(0);
+	return 0;
+}
+
+
+ECpoint ECpoint::operator + (const ECpoint &a) const {
+	// Implement  elliptic curve addition 		
+
+	assert(0);
+	return ECpoint(true);
+}
+
+
+ECpoint ECpoint::repeatSum(ECpoint p, uberzahl v) const {
+	//Find the sum of p+p+...+p (vtimes)		
+
+	assert(0);
+	return ECpoint(true);
+}
+
+Zp ECsystem::power(Zp val, uberzahl pow) {
+	//Find the product of val*val*...*val (pow times)
+
+	assert(0);
+	return 0;
+}
+
+
+uberzahl ECsystem::pointCompress(ECpoint e) {
+	//It is the gamma function explained in the assignment.
+	//Note: Here return type is mpz_class because the function may
+	//map to a value greater than the defined PRIME number (i.e, range of Zp)
+	//This function is fully defined.	
+	uberzahl compressedPoint = e.x.getValue();
+	compressedPoint = compressedPoint<<1;
+	
+	if(e.infinityPoint) {
+		cout<<"Point cannot be compressed as its INF-POINT"<<flush;
+		abort();
+		}
+	else {
+		if (e.y.getValue()%2 == 1)
+			compressedPoint = compressedPoint + 1;
+		}
+		//cout<<"For point  "<<e<<"  Compressed point is <<"<<compressedPoint<<"\n";
+		return compressedPoint;
+
+}
+
+ECpoint ECsystem::pointDecompress(uberzahl compressedPoint){
+	//Implement the delta function for decompressing the compressed point
+
+	assert(0);
+	return ECpoint(true);
+}
+
+
+pair<pair<Zp,Zp>,uberzahl> ECsystem::encrypt(ECpoint publicKey, uberzahl privateKey,Zp plaintext0,Zp plaintext1){
+	// You must implement elliptic curve encryption
+	//  Do not generate a random key. Use the private key that is passed from the main function
+
+	assert(0);
+	return make_pair(make_pair(0,0),0);
+}
+
+
+pair<Zp,Zp> ECsystem::decrypt(pair<pair<Zp,Zp>, uberzahl> ciphertext){
+	// Implement EC Decryption
+
+	assert(0);
+	return make_pair(0,0);
+}
+
+
+/*
+ * main: Compute a pair of public key and private key
+ *       Generate plaintext (m1, m2)
+ *       Encrypt plaintext using elliptic curve encryption
+ *       Decrypt ciphertext using elliptic curve decryption
+ *       Should get the original plaintext
+ *       Don't change anything in main.  We will use this to 
+ *       evaluate the correctness of your program.
+ */
+
+
+int main(void){
+	srand(time(0));
+	ECsystem ec;
+	unsigned long incrementVal;	
+	pair <ECpoint, uberzahl> keys = ec.generateKeys();
+	
+	
+	Zp plaintext0(MESSAGE0);
+	Zp plaintext1(MESSAGE1);
+	ECpoint publicKey = keys.first;
+	cout<<"Public key is: "<<publicKey<<"\n";
+	
+	cout<<"Enter offset value for sender's private key"<<endl;
+	cin>>incrementVal;
+	uberzahl privateKey = XB + incrementVal;
+	
+	pair<pair<Zp,Zp>, uberzahl> ciphertext = ec.encrypt(publicKey, privateKey, plaintext0,plaintext1);	
+	cout<<"Encrypted ciphertext is: ("<<ciphertext.first.first<<", "<<ciphertext.first.second<<", "<<ciphertext.second<<")\n";
+	pair<Zp,Zp> plaintext_out = ec.decrypt(ciphertext);
+	
+	cout << "Original plaintext is: (" << plaintext0 << ", " << plaintext1 << ")\n";
+	cout << "Decrypted plaintext: (" << plaintext_out.first << ", " << plaintext_out.second << ")\n";
+
+
+	if(plaintext0 == plaintext_out.first && plaintext1 == plaintext_out.second)
+		cout << "Correct!" << endl;
+	else
+		cout << "Plaintext different from original plaintext." << endl;	
+			
+	return 1;
+
+}
+</textarea>
+
+<div class='container is-fluid'>
+
+<button class='button is-primary' onClick='javascript:submitcode()'>Submit</button>
+
+<pre id='result'>
+</pre>
+
+</div>
+
+  <script>
+// editor part
+var editor = ace.edit("ha", {
+  mode: 'ace/mode/c_cpp',
+  theme: 'ace/theme/tomorrow_night',
+	maxLines: 40,
+	minLines: 10,
+  })
+
+
+// socket part
+    var socket = io('https://eecs475w18proj.tmt514.net');
+socket.on('connect', function() {
+  console.log('socket io tries to connect!')
+})
+socket.on('judge_msg', function(msg) {
+  var t = document.getElementById('result').textContent
+  t += "\n" + msg
+  document.getElementById('result').textContent = t
+})
+
+  function submitcode() {
+    var code = editor.getValue()
+    document.getElementById('result').textContent = ""
+    socket.emit('submit', code)
+
+  }
+
+  </script>
+
+  <footer class='footer'>
+    <div class='content has-text-centered'>
+      This project is created by EECS 475 Winter 2018 Staff.
+      CSS Templates and Editor from <a href='https://bulma.io'>BULMA</a> and <a href='https://ace.c9.io/'>Ace Editor</a>.
+      <br>
+      Please help us protect this server and don't ruin it :-)
+    </div>
+  </footer>
+</body>
+</html>
